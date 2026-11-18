@@ -22,9 +22,27 @@ describe("generateCaptions", () => {
     expect(String(f.mock.calls[0][0])).not.toContain("test-gemini-key");
     expect(f.mock.calls[0][1].headers["x-goog-api-key"]).toBe("test-gemini-key-000");
   });
-  it("fails safely on HTTP errors and malformed output", async () => {
+  it("falls back to the next model when one is overloaded or times out", async () => {
+    const f = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 503 })
+      .mockRejectedValueOnce(Object.assign(new Error("timeout"), { name: "TimeoutError" }))
+      .mockResolvedValueOnce(reply({ options: [{ caption: "Works now", hashtags: ["a"] }] }));
+    vi.stubGlobal("fetch", f);
+    const r = await generateCaptions(input);
+    expect(r.data).toEqual([{ caption: "Works now", hashtags: ["a"] }]);
+    const urls = f.mock.calls.map((c) => String(c[0]));
+    expect(new Set(urls).size).toBe(3); // three different models were tried
+  });
+  it("does not fall back on a bad key or request (400/403)", async () => {
+    const f = vi.fn().mockResolvedValue({ ok: false, status: 403 });
+    vi.stubGlobal("fetch", f);
+    expect((await generateCaptions(input)).error).toContain("403");
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+  it("fails safely when every model is down, and on malformed output", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 429 }));
-    expect((await generateCaptions(input)).error).toBe("gemini 429");
+    expect((await generateCaptions(input)).error).toContain("429");
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(reply({ nope: 1 })));
     expect((await generateCaptions(input)).error).toBe("gemini bad shape");
   });

@@ -17,7 +17,7 @@ export function getPublicEnv() {
 
 const serverSchema = z.object({
   GEMINI_API_KEY: z.string().min(10),
-  GEMINI_MODEL: z.string().min(1).default("gemini-flash-latest"),
+  GEMINI_MODEL: z.string().min(1).default("gemini-3.5-flash-lite"),
   GOOGLE_CLIENT_ID: z.string().min(10),
   GOOGLE_CLIENT_SECRET: z.string().min(10),
   EMAIL_SMTP_HOST: z.string().min(3),
