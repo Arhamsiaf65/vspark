@@ -1,4 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+const sendMail = vi.hoisted(() => vi.fn());
+vi.mock("nodemailer", () => ({ default: { createTransport: () => ({ sendMail }) } }));
+
 import { renderBody, renderSubject, sendReminder } from "@/lib/services/email";
 
 const mail = {
@@ -13,7 +17,7 @@ const mail = {
   includeCaption: true,
 };
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => sendMail.mockReset());
 
 describe("email rendering", () => {
   it("fills template variables and strips newlines", () => {
@@ -30,14 +34,13 @@ describe("email rendering", () => {
 });
 
 describe("sendReminder", () => {
-  it("returns data on success", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true }));
+  it("sends via SMTP with the rendered subject", async () => {
+    sendMail.mockResolvedValue({});
     expect((await sendReminder(mail)).error).toBeNull();
+    expect(sendMail.mock.calls[0][0]).toMatchObject({ to: "a@b.co", subject: expect.stringContaining("Time: Launch") });
   });
-  it("returns an error (never throws) on failure", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 403 }));
-    expect((await sendReminder(mail)).error).toBe("resend 403");
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
-    expect((await sendReminder(mail)).error).toBe("offline");
+  it("returns an error (never throws) when SMTP fails", async () => {
+    sendMail.mockRejectedValue(new Error("Invalid login"));
+    expect((await sendReminder(mail)).error).toBe("Invalid login");
   });
 });

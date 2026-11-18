@@ -1,4 +1,5 @@
 import "server-only";
+import nodemailer, { type Transporter } from "nodemailer";
 import { getServerEnv } from "@/lib/env";
 
 type Result<T> = { data: T; error: null } | { data: null; error: string };
@@ -47,22 +48,32 @@ ${quote}
 </div>`;
 }
 
+let transport: Transporter | undefined;
+
+function getTransport() {
+  const env = getServerEnv();
+  transport ??= nodemailer.createTransport({
+    host: env.EMAIL_SMTP_HOST,
+    port: env.EMAIL_SMTP_PORT,
+    secure: env.EMAIL_SMTP_PORT === 465,
+    auth: { user: env.EMAIL_SMTP_USER, pass: env.EMAIL_SMTP_PASSWORD },
+    connectionTimeout: 10_000,
+    socketTimeout: 15_000,
+  });
+  return transport;
+}
+
 export async function sendReminder(m: ReminderEmail): Promise<Result<true>> {
   try {
     const env = getServerEnv();
     const when = formatWhen(m.scheduledAt, m.timezone);
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
-      body: JSON.stringify({
-        from: env.EMAIL_FROM,
-        to: [m.to],
-        subject: renderSubject(m.subjectTemplate, { title: m.title, platform: m.platform, when }),
-        html: renderBody(m, when),
-      }),
-      signal: AbortSignal.timeout(15_000),
+    await getTransport().sendMail({
+      from: env.EMAIL_FROM,
+      to: m.to,
+      subject: renderSubject(m.subjectTemplate, { title: m.title, platform: m.platform, when }),
+      html: renderBody(m, when),
     });
-    return res.ok ? { data: true, error: null } : { data: null, error: `resend ${res.status}` };
+    return { data: true, error: null };
   } catch (e) {
     return { data: null, error: e instanceof Error ? e.message : "email failed" };
   }

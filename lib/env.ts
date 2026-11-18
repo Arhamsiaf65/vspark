@@ -20,7 +20,10 @@ const serverSchema = z.object({
   GEMINI_MODEL: z.string().min(1).default("gemini-flash-latest"),
   GOOGLE_CLIENT_ID: z.string().min(10),
   GOOGLE_CLIENT_SECRET: z.string().min(10),
-  RESEND_API_KEY: z.string().min(10),
+  EMAIL_SMTP_HOST: z.string().min(3),
+  EMAIL_SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
+  EMAIL_SMTP_USER: z.string().min(3),
+  EMAIL_SMTP_PASSWORD: z.string().min(8),
   EMAIL_FROM: z.string().min(5),
   CRON_SECRET: z.string().min(16),
 });
@@ -36,7 +39,10 @@ export function getServerEnv(): ServerEnv {
     GEMINI_MODEL: process.env.GEMINI_MODEL || undefined,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_SMTP_HOST: process.env.EMAIL_SMTP_HOST,
+    EMAIL_SMTP_PORT: process.env.EMAIL_SMTP_PORT || undefined,
+    EMAIL_SMTP_USER: process.env.EMAIL_SMTP_USER,
+    EMAIL_SMTP_PASSWORD: process.env.EMAIL_SMTP_PASSWORD,
     EMAIL_FROM: process.env.EMAIL_FROM,
     CRON_SECRET: process.env.CRON_SECRET,
   });
