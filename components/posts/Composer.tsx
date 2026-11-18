@@ -31,12 +31,10 @@ export function Composer() {
     live.validateField(next, field, { blur });
   };
 
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!live.validateAll(gen)) return;
+  function run(fresh: boolean) {
     setServerErrors(undefined);
     start(async () => {
-      const res = await generateCaptionsAction(gen);
+      const res = await generateCaptionsAction(gen, fresh);
       if (!res.ok) {
         setServerErrors(res.fieldErrors);
         toast.error(res.error);
@@ -45,6 +43,11 @@ export function Composer() {
       setOptions(res.data ?? []);
       setPicked(null);
     });
+  }
+
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (live.validateAll(gen)) run(false);
   }
 
   return (
@@ -80,9 +83,16 @@ export function Composer() {
             ))}
           </Select>
         </div>
-        <SubmitButton pending={pending} pendingLabel="Asking Gemini…">
-          Generate 3 options
-        </SubmitButton>
+        <div className="flex flex-wrap gap-2">
+          <SubmitButton pending={pending} pendingLabel="Asking Gemini…">
+            Generate 3 options
+          </SubmitButton>
+          {options.length > 0 && (
+            <button type="button" className="btn btn-outline" disabled={pending} onClick={() => live.validateAll(gen) && run(true)}>
+              Regenerate
+            </button>
+          )}
+        </div>
       </form>
 
       {options.length > 0 && (

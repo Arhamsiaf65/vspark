@@ -2,8 +2,13 @@ import "server-only";
 import type { ActionResult } from "@/lib/types/action-result";
 
 /** Map any error to a message that is safe to show. Details are logged server-side only. */
+export function log(level: "info" | "warn" | "error", msg: string, extra?: Record<string, unknown>) {
+  const line = JSON.stringify({ level, ts: new Date().toISOString(), msg: redact(msg), ...extra });
+  (level === "error" ? console.error : level === "warn" ? console.warn : console.log)(line);
+}
+
 export function toSafeError(err: unknown, fallback = "Something went wrong. Please try again."): string {
-  console.error("[error]", redact(err instanceof Error ? err.message : String(err)));
+  log("error", err instanceof Error ? err.message : String(err));
   return fallback;
 }
 
@@ -17,7 +22,9 @@ export function redact(text: string): string {
 
 export type Role = "anonymous" | "user" | "admin";
 
-export function requireRole(current: Role, allowed: Role[]): ActionResult | null {
+export type Denied = Extract<ActionResult, { ok: false }>;
+
+export function requireRole(current: Role, allowed: Role[]): Denied | null {
   return allowed.includes(current) ? null : { ok: false, error: "You don't have permission to do that." };
 }
 

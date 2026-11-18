@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { getServerEnv } from "@/lib/env";
-import { toSafeError } from "@/lib/security";
+import { log, toSafeError } from "@/lib/security";
 import { createAnonClient } from "@/lib/supabase/server";
 import { processDueReminders } from "@/lib/services/reminders";
 
@@ -24,5 +24,6 @@ export async function GET(request: NextRequest) {
     toSafeError(new Error(res.error));
     return NextResponse.json({ error: "Failed to process reminders" }, { status: 500 });
   }
+  log("info", "reminders processed", res.data);
   return NextResponse.json(res.data);
 }

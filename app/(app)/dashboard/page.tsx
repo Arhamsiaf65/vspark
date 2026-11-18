@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -9,8 +10,13 @@ import { toSafeError } from "@/lib/security";
 import { listQuerySchema } from "@/lib/validation/posts";
 import { Composer } from "@/components/posts/Composer";
 import { PostList } from "@/components/posts/PostList";
-import { SettingsForm } from "@/components/posts/SettingsForm";
+import { PostFilters } from "@/components/posts/PostFilters";
 import { ErrorPanel, PageSkeleton } from "@/components/ui/Panels";
+
+// Settings sit below the fold: load their JS in a separate chunk.
+const SettingsForm = dynamic(() => import("@/components/posts/SettingsForm").then((m) => m.SettingsForm), {
+  loading: () => <PageSkeleton />,
+});
 
 async function Feed({ searchParams }: { searchParams: PageProps<"/dashboard">["searchParams"] }) {
   const raw = await searchParams;
@@ -53,7 +59,8 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/dashboard">["s
         <h2 id="feed-h" className="font-display text-xl font-bold">
           Your posts
         </h2>
-        <PostList posts={posts.data.items} />
+        <PostFilters key={`${params.q}|${params.status}|${params.sort}`} initial={{ q: params.q, status: params.status, sort: params.sort }} />
+        <PostList posts={posts.data.items} filtered={params.q !== "" || params.status !== "all"} />
         <nav aria-label="Pagination" className="flex gap-3">
           {params.cursor && (
             <Link href="/dashboard" className="btn btn-outline btn-sm">

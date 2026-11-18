@@ -1,8 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { RATE_LIMITED, rateLimit, toSafeError } from "@/lib/security";
+import { RATE_LIMITED, rateLimit, requireRole, toSafeError, type Denied, type Role } from "@/lib/security";
 import type { ActionResult } from "@/lib/types/action-result";
 import {
   deletePostSchema,
@@ -12,7 +12,8 @@ import {
 } from "@/lib/validation/posts";
 import { settingsSchema } from "@/lib/validation/settings";
 import type { CaptionOption } from "@/lib/validation/ai";
-import { generateCaptions } from "@/lib/services/gemini";
+import { captionCacheTag, generateCaptions, generateCaptionsCached } from "@/lib/services/gemini";
+import { getRole } from "@/lib/services/profile";
 import { createPost, deletePost, restorePost, setDriveFileId, updatePost, type PostRow } from "@/lib/services/posts";
 import { deleteFile, syncPost } from "@/lib/services/drive";
 import { saveSettings } from "@/lib/services/settings";
@@ -23,7 +24,15 @@ const DRIVE_WARNING = "Saved, but syncing to Google Drive failed. Sign out and b
 async function currentUser() {
   const db = await createClient();
   const { data } = await db.auth.getUser();
-  return { db, user: data.user };
+  if (!data.user) return { db, user: null, role: "anonymous" as Role };
+  const role = await getRole(db, data.user.id);
+  return { db, user: data.user, role: (role.data ?? "user") as Role };
+}
+
+/** Deny by default: only signed-in users and admins may run actions. */
+function guard(user: unknown, role: Role): Denied | null {
+  if (!user) return { ok: false, error: NOT_SIGNED_IN };
+  return requireRole(role, ["user", "admin"]);
 }
 
 function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
@@ -44,23 +53,36 @@ async function pushToDrive(db: Awaited<ReturnType<typeof createClient>>, userId:
   return true;
 }
 
-export async function generateCaptionsAction(input: unknown): Promise<ActionResult<CaptionOption[]>> {
-  const { user } = await currentUser();
-  if (!user) return { ok: false, error: NOT_SIGNED_IN };
+export async function generateCaptionsAction(input: unknown, fresh = false): Promise<ActionResult<CaptionOption[]>> {
+  const { user, role } = await currentUser();
+  const denied = guard(user, role);
+  if (denied || !user) return denied ?? { ok: false, error: NOT_SIGNED_IN };
 
   const parsed = generateSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Check the highlighted fields.", fieldErrors: fieldErrors(parsed.error.issues) };
 
   if (!rateLimit(`gen:${user.id}`, 10, 60_000).allowed) return { ok: false, error: RATE_LIMITED };
 
-  const res = await generateCaptions(parsed.data);
-  if (res.data === null) return { ok: false, error: toSafeError(new Error(res.error), "Couldn't generate captions right now. Please try again.") };
-  return { ok: true, data: res.data };
+  try {
+    if (fresh) {
+      // "Regenerate": expire this prompt's cache entry and ask Gemini again.
+      updateTag(captionCacheTag(parsed.data));
+      const res = await generateCaptions(parsed.data);
+      if (res.data === null) throw new Error(res.error);
+      return { ok: true, data: res.data };
+    }
+    return { ok: true, data: await generateCaptionsCached(parsed.data) };
+  } catch (e) {
+    return { ok: false, error: toSafeError(e, "Couldn't generate captions right now. Please try again in a moment.") };
+  }
 }
 
 export async function savePostAction(input: unknown): Promise<ActionResult<{ id: string }>> {
-  const { db, user } = await currentUser();
-  if (!user) return { ok: false, error: NOT_SIGNED_IN };
+  const { db, user, role } = await currentUser();
+  const denied = guard(user, role);
+  if (denied || !user) return denied ?? { ok: false, error: NOT_SIGNED_IN };
+
+  if (!rateLimit(`save:${user.id}`, 30, 60_000).allowed) return { ok: false, error: RATE_LIMITED };
 
   const parsed = savePostSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Check the highlighted fields.", fieldErrors: fieldErrors(parsed.error.issues) };
@@ -85,8 +107,9 @@ export async function savePostAction(input: unknown): Promise<ActionResult<{ id:
 }
 
 export async function updatePostAction(input: unknown): Promise<ActionResult> {
-  const { db, user } = await currentUser();
-  if (!user) return { ok: false, error: NOT_SIGNED_IN };
+  const { db, user, role } = await currentUser();
+  const denied = guard(user, role);
+  if (denied || !user) return denied ?? { ok: false, error: NOT_SIGNED_IN };
 
   const parsed = updatePostSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Check the highlighted fields.", fieldErrors: fieldErrors(parsed.error.issues) };
@@ -114,8 +137,9 @@ export async function updatePostAction(input: unknown): Promise<ActionResult> {
 }
 
 export async function deletePostAction(input: unknown): Promise<ActionResult> {
-  const { db, user } = await currentUser();
-  if (!user) return { ok: false, error: NOT_SIGNED_IN };
+  const { db, user, role } = await currentUser();
+  const denied = guard(user, role);
+  if (denied || !user) return denied ?? { ok: false, error: NOT_SIGNED_IN };
 
   const parsed = deletePostSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Invalid post." };
@@ -136,8 +160,9 @@ export async function deletePostAction(input: unknown): Promise<ActionResult> {
 }
 
 export async function saveSettingsAction(input: unknown): Promise<ActionResult> {
-  const { db, user } = await currentUser();
-  if (!user) return { ok: false, error: NOT_SIGNED_IN };
+  const { db, user, role } = await currentUser();
+  const denied = guard(user, role);
+  if (denied || !user) return denied ?? { ok: false, error: NOT_SIGNED_IN };
 
   const parsed = settingsSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Check the highlighted fields.", fieldErrors: fieldErrors(parsed.error.issues) };
@@ -151,8 +176,9 @@ export async function saveSettingsAction(input: unknown): Promise<ActionResult> 
 
 /** Undo a soft delete and re-create the Drive file (it was removed on delete). */
 export async function restorePostAction(input: unknown): Promise<ActionResult> {
-  const { db, user } = await currentUser();
-  if (!user) return { ok: false, error: NOT_SIGNED_IN };
+  const { db, user, role } = await currentUser();
+  const denied = guard(user, role);
+  if (denied || !user) return denied ?? { ok: false, error: NOT_SIGNED_IN };
 
   const parsed = deletePostSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Invalid post." };

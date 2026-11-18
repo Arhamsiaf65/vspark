@@ -18,7 +18,7 @@ function toLocalInput(iso: string | null): string {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-export function PostList({ posts }: { posts: PostRow[] }) {
+export function PostList({ posts, filtered = false }: { posts: PostRow[]; filtered?: boolean }) {
   const [visible, hide] = useOptimistic(posts, (state, id: string) => state.filter((p) => p.id !== id));
   const [, start] = useTransition();
 
@@ -41,6 +41,7 @@ export function PostList({ posts }: { posts: PostRow[] }) {
   }
 
   if (visible.length === 0) {
+    if (filtered) return <EmptyState title="No matching posts" body="Try a different search or clear the status filter." />;
     return <EmptyState title="No posts yet" body="Generate a caption above, pick one and schedule it. It will show up here and in your Google Drive." />;
   }
   return (
