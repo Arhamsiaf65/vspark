@@ -1,36 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Captionly: AI captions, scheduled to Google Drive
 
-## Getting Started
+Next.js 16 + Supabase + Gemini + Google Drive + Resend.
 
-First, run the development server:
+## Flow
+1. Sign in with Google (Supabase Auth; requests the `drive.file` scope and an offline refresh token).
+2. Describe a post, and Gemini returns 3 captions with hashtags.
+3. Pick one, set a publish time and reminder lead time. The post is saved to Postgres and synced as JSON to `AI Post Scheduler/` in the user's Drive.
+4. The `/api/cron/reminders` route emails each user before a scheduled post (customizable in the settings form).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Setup
+1. Run `supabase/migrations/0001_init.sql` in the Supabase SQL editor, then insert the cron secret (see the end of that file).
+2. Copy `.env.example` to `.env.local` and fill in the values.
+3. Supabase → Authentication → Providers → Google: add the Google client ID and secret.
+   Authentication → URL Configuration: set the Site URL and add `<site>/auth/callback` as a redirect URL.
+4. Google Cloud: enable the Drive API. The OAuth client's authorized redirect URI is `https://<project-ref>.supabase.co/auth/v1/callback`.
+   Add the `.../auth/drive.file` scope on the consent screen.
+5. `npm run dev`. Before pushing, run `npm run check`.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Reminders schedule
+`vercel.json` runs the cron once a day (the Vercel Hobby limit). For minute-level reminders use Vercel Pro, or an external scheduler such as cron-job.org that calls `GET /api/cron/reminders` with the header `Authorization: Bearer $CRON_SECRET`.
