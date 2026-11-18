@@ -6,7 +6,7 @@ async function LoginError({ searchParams }: { searchParams: PageProps<"/login">[
   if (!error) return null;
   return (
     <p role="alert" className="rounded-2xl bg-brand-soft px-4 py-3 text-sm font-medium text-danger">
-      We couldn&apos;t sign you in. Please try again.
+      {error === "rate" ? "Too many attempts. Please wait a minute and try again." : "We couldn't sign you in. Please try again."}
     </p>
   );
 }
