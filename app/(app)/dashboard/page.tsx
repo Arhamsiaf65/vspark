@@ -46,15 +46,15 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/dashboard">["s
   return (
     <>
       {!drive.data && (
-        <div role="status" className="rounded-3xl border border-line bg-brand-soft p-4 text-sm">
+        <div role="status" className="rounded-3xl border border-brand/30 bg-brand-soft p-4 text-sm text-ink">
           Google Drive isn&apos;t connected yet. Sign out and sign back in, and accept the Drive permission, to sync your drafts.
         </div>
       )}
       <section aria-labelledby="feed-h" className="space-y-4">
         <div className="grid grid-cols-3 gap-3">
-          <Stat label="Posts" value={stats.data.total} />
-          <Stat label="Scheduled" value={stats.data.scheduled} />
-          <Stat label="In Drive" value={stats.data.inDrive} />
+          <Stat label="Posts" value={stats.data.total} tone="text-ink" />
+          <Stat label="Scheduled" value={stats.data.scheduled} tone="text-brand-strong" />
+          <Stat label="In Drive" value={stats.data.inDrive} tone="text-accent" />
         </div>
         <h2 id="feed-h" className="font-display text-xl font-bold">
           Your posts
@@ -79,10 +79,10 @@ async function Feed({ searchParams }: { searchParams: PageProps<"/dashboard">["s
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value, tone }: { label: string; value: number; tone: string }) {
   return (
     <div className="card !p-4">
-      <p className="font-display text-3xl font-extrabold">{value}</p>
+      <p className={`font-display text-3xl font-extrabold ${tone}`}>{value}</p>
       <p className="text-xs text-muted">{label}</p>
     </div>
   );

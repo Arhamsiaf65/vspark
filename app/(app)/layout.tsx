@@ -17,7 +17,7 @@ async function Gate({ children }: { children: React.ReactNode }) {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <header className="border-b border-line bg-surface">
+      <header className="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-display text-lg font-extrabold">
             <Image src="/logo.svg" alt="" width={28} height={28} priority />

@@ -58,13 +58,13 @@ function PostCard({ post, onDelete }: { post: PostRow; onDelete: () => void }) {
   const [confirming, setConfirming] = useState(false);
 
   return (
-    <li className="card space-y-3">
+    <li className="card space-y-3 border-l-4 border-l-brand">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="font-display text-lg font-bold">{post.title}</h3>
-        <span className="chip">{post.platform}</span>
-        <span className="chip">{post.status}</span>
-        {post.reminder_sent_at && <span className="chip">reminder sent</span>}
-        {post.drive_file_id ? <span className="chip">in Drive</span> : <span className="chip">not in Drive</span>}
+        <span className="chip-muted">{post.platform}</span>
+        <span className={post.status === "scheduled" ? "chip" : "chip-muted"}>{post.status}</span>
+        {post.reminder_sent_at && <span className="chip-success">reminder sent</span>}
+        {post.drive_file_id ? <span className="chip-accent">in Drive</span> : <span className="chip-muted">not in Drive</span>}
       </div>
       {post.scheduled_at && (
         <p className="text-sm text-muted">
@@ -76,7 +76,7 @@ function PostCard({ post, onDelete }: { post: PostRow; onDelete: () => void }) {
       ) : (
         <>
           <p className="whitespace-pre-wrap text-sm">{post.caption}</p>
-          {post.hashtags.length > 0 && <p className="text-sm font-medium text-brand-strong">{post.hashtags.map((h) => `#${h}`).join(" ")}</p>}
+          {post.hashtags.length > 0 && <p className="text-sm font-semibold text-accent">{post.hashtags.map((h) => `#${h}`).join(" ")}</p>}
           {post.notes && <p className="text-xs text-muted">Notes: {post.notes}</p>}
           <div className="flex gap-2 pt-1">
             <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditing(true)}>

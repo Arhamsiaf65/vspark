@@ -13,8 +13,8 @@ async function LoginError({ searchParams }: { searchParams: PageProps<"/login">[
 
 export default function LoginPage(props: PageProps<"/login">) {
   return (
-    <main id="main" className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 px-4">
-      <div className="card space-y-5">
+    <main id="main" className="hero-glow flex min-h-dvh items-center justify-center px-4">
+      <div className="card w-full max-w-md space-y-5">
         <h1 className="font-display text-2xl font-extrabold">Sign in</h1>
         <p className="text-sm text-muted">
           We ask for access only to the files this app creates in your Google Drive, so drafts can be saved and synced.

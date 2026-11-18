@@ -1,32 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --canvas: #faf7f2;
+  --canvas: #f7f4ef;
   --surface: #ffffff;
-  --ink: #1b1712;
-  --muted: #6b645a;
-  --line: #e8e1d6;
-  --brand: #f97316;
-  --brand-soft: #fff1e6;
-  --brand-strong: #b45309;
-  --brand-ink: #1b1712;
+  --ink: #17140f;
+  --muted: #6a6358;
+  --line: #e7e0d5;
+  --brand: #ff7a2f;
+  --brand-soft: #fff0e4;
+  --brand-strong: #b3470a;
+  --brand-ink: #17140f;
+  --accent: #0f766e;
+  --accent-soft: #dff3ef;
   --success: #15803d;
   --danger: #b91c1c;
+  --hero: #17140f;
+  --hero-ink: #f7f4ef;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --canvas: #14110d;
-    --surface: #1e1a15;
+    --canvas: #12100c;
+    --surface: #1c1914;
     --ink: #f5efe6;
-    --muted: #a39a8b;
-    --line: #342e26;
-    --brand: #fb923c;
-    --brand-soft: #3a2411;
-    --brand-strong: #fdba74;
-    --brand-ink: #1b1712;
+    --muted: #a79e90;
+    --line: #322d25;
+    --brand: #ff8a47;
+    --brand-soft: #3b2312;
+    --brand-strong: #ffb27a;
+    --brand-ink: #17140f;
+    --accent: #2dd4bf;
+    --accent-soft: #10312d;
     --success: #4ade80;
     --danger: #f87171;
+    --hero: #0b0a08;
+    --hero-ink: #f5efe6;
   }
 }
 
@@ -40,6 +48,10 @@
   --color-brand-soft: var(--brand-soft);
   --color-brand-strong: var(--brand-strong);
   --color-brand-ink: var(--brand-ink);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-hero: var(--hero);
+  --color-hero-ink: var(--hero-ink);
   --color-success: var(--success);
   --color-danger: var(--danger);
   --font-display: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
@@ -62,7 +74,7 @@ body {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-primary {
-    @apply bg-brand text-brand-ink hover:brightness-95;
+    @apply bg-brand text-brand-ink shadow-[0_6px_18px_-6px_var(--brand)] hover:brightness-95;
   }
   .btn-outline {
     @apply border border-line bg-surface text-ink hover:bg-brand-soft;
@@ -74,10 +86,28 @@ body {
     @apply px-3.5 py-1.5 text-xs;
   }
   .card {
-    @apply rounded-3xl border border-line bg-surface p-5 sm:p-6;
+    @apply rounded-3xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgb(0_0_0/0.04)] sm:p-6;
   }
   .chip {
-    @apply inline-flex items-center rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-brand-strong;
+    @apply inline-flex items-center rounded-full bg-brand-soft px-3 py-1 text-xs font-semibold text-brand-strong;
+  }
+  .chip-muted {
+    @apply inline-flex items-center rounded-full bg-line px-3 py-1 text-xs font-semibold text-muted;
+  }
+  .chip-accent {
+    @apply inline-flex items-center rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent;
+  }
+  .chip-success {
+    @apply inline-flex items-center rounded-full bg-success/15 px-3 py-1 text-xs font-semibold text-success;
+  }
+  .step-badge {
+    @apply inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-brand font-display text-sm font-extrabold text-brand-ink;
+  }
+  .hero-glow {
+    background:
+      radial-gradient(60% 50% at 85% 0%, color-mix(in srgb, var(--brand) 38%, transparent), transparent 70%),
+      radial-gradient(45% 40% at 5% 100%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 70%),
+      var(--hero);
   }
   .link {
     @apply font-medium text-brand-strong underline underline-offset-4 hover:no-underline;

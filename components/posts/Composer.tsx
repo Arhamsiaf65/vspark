@@ -53,8 +53,8 @@ export function Composer() {
   return (
     <section aria-labelledby="gen-h" className="space-y-6">
       <form onSubmit={onSubmit} noValidate className="card space-y-4">
-        <h2 id="gen-h" className="font-display text-xl font-bold">
-          1 · Generate captions
+        <h2 id="gen-h" className="flex items-center gap-3 font-display text-xl font-bold">
+          <span className="step-badge">1</span> Generate captions
         </h2>
         <Textarea
           label="What is the post about?"
@@ -98,9 +98,9 @@ export function Composer() {
       {options.length > 0 && (
         <ul className="grid gap-4 md:grid-cols-3" aria-label="Caption options">
           {options.map((o, i) => (
-            <li key={i} className={`card flex flex-col gap-3 ${picked === o ? "ring-2 ring-brand" : ""}`}>
+            <li key={i} className={`card flex flex-col gap-3 transition hover:-translate-y-0.5 ${picked === o ? "border-brand ring-2 ring-brand" : ""}`}>
               <p className="whitespace-pre-wrap text-sm">{o.caption}</p>
-              <p className="text-xs font-medium text-brand-strong">{o.hashtags.map((h) => `#${h}`).join(" ")}</p>
+              <p className="text-xs font-semibold text-accent">{o.hashtags.map((h) => `#${h}`).join(" ")}</p>
               <button type="button" className="btn btn-outline btn-sm mt-auto" onClick={() => setPicked(o)}>
                 {picked === o ? "Selected" : "Use this caption"}
               </button>
@@ -170,8 +170,8 @@ function ScheduleForm({ option, platform, promptHint, onSaved }: { option: Capti
 
   return (
     <form onSubmit={onSubmit} noValidate className="card space-y-4" aria-labelledby="sched-h">
-      <h2 id="sched-h" className="font-display text-xl font-bold">
-        2 · Schedule &amp; save to Drive
+      <h2 id="sched-h" className="flex items-center gap-3 font-display text-xl font-bold">
+        <span className="step-badge">2</span> Schedule &amp; save to Drive
       </h2>
       <Input label="Task title" {...bind("title")} error={err("title")} hint={<CharCount value={f.title} max={80} />} />
       <Textarea label="Caption" {...bind("caption")} error={err("caption")} hint={<CharCount value={f.caption} max={2200} />} />
