@@ -39,7 +39,7 @@ export function renderSubject(template: string, vars: { title: string; platform:
 export function renderBody(m: ReminderEmail, when: string): string {
   const tags = m.hashtags.map((h) => `#${esc(h)}`).join(" ");
   const quote = m.includeCaption
-    ? `<blockquote style="border-left:4px solid #f97316;margin:0;padding:8px 16px;background:#fff7ed;white-space:pre-wrap">${esc(m.caption)}${tags ? `<br><br>${tags}` : ""}</blockquote>`
+    ? `<blockquote style="border-left:4px solid #6d5efc;margin:0;padding:8px 16px;background:#eeecff;white-space:pre-wrap">${esc(m.caption)}${tags ? `<br><br>${tags}` : ""}</blockquote>`
     : "";
   return `<div style="font-family:system-ui,sans-serif;max-width:520px;margin:auto">
 <h2 style="margin:0 0 8px">${esc(m.title)}</h2>

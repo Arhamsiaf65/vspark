@@ -29,12 +29,12 @@ export default function Home() {
 
           <div id="main" className="grid items-center gap-10 pb-12 lg:grid-cols-[1.2fr_1fr]">
             <div className="space-y-6">
-              <span className="inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-brand">
+              <span className="inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-hero-accent">
                 Gemini · Google Drive · Email reminders
               </span>
               <h1 className="font-display text-4xl font-extrabold leading-[1.05] sm:text-6xl">
                 Captions in seconds.{" "}
-                <span className="relative inline-block text-brand">
+                <span className="relative inline-block text-hero-accent">
                   Posts planned
                   <svg aria-hidden="true" viewBox="0 0 300 12" preserveAspectRatio="none" className="absolute -bottom-2 left-0 h-2.5 w-full">
                     <path d="M2 8 C 60 2, 120 12, 180 5 S 280 4, 298 7" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
@@ -60,7 +60,7 @@ export default function Home() {
                 <span className="size-2 rounded-full bg-accent" /> Instagram · friendly
               </div>
               <p className="text-sm leading-relaxed">{SAMPLE.caption}</p>
-              <p className="mt-3 text-sm font-semibold text-brand">{SAMPLE.tags.map((t) => `#${t}`).join(" ")}</p>
+              <p className="mt-3 text-sm font-semibold text-hero-accent">{SAMPLE.tags.map((t) => `#${t}`).join(" ")}</p>
               <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-xs text-hero-ink/60">
                 <span>Fri · 9:00 AM</span>
                 <span className="rounded-full bg-accent/20 px-2.5 py-1 font-semibold text-accent">Saved to Drive</span>
