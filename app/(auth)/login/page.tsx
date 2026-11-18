@@ -13,7 +13,7 @@ async function LoginError({ searchParams }: { searchParams: PageProps<"/login">[
 
 export default function LoginPage(props: PageProps<"/login">) {
   return (
-    <main id="main" className="hero-glow flex min-h-dvh items-center justify-center px-4">
+    <main id="main" className="hero-flat flex min-h-dvh items-center justify-center px-4">
       <div className="card w-full max-w-md space-y-5">
         <h1 className="font-display text-2xl font-extrabold">Sign in</h1>
         <p className="text-sm text-muted">

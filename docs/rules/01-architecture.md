@@ -136,10 +136,10 @@ hand-drawn underline, pill buttons, category chips).
 - **Tokens, not hard-coded colours.** All colours come from the CSS variables in `app/globals.css`
   (`canvas, surface, ink, muted, line, brand, brand-soft, brand-strong, success, danger`), exposed as Tailwind
   classes (`bg-brand`, `text-muted`, `border-line`...). Dark mode swaps the variables; never write `dark:` colour pairs.
-- **Orange is an accent, ink is its text colour.** Text ON orange uses `text-brand-ink` (dark) for WCAG AA;
+- **Cobalt is the single accent; white (`text-brand-ink`) is its text colour.** Text ON orange uses `text-brand-ink` (dark) for WCAG AA;
   orange used AS text on light surfaces uses `text-brand-strong`.
 - **Shared classes:** `.btn` + `.btn-primary|outline|dark|sm`, `.card`, `.chip`, `.link`. Use them instead of ad-hoc class strings.
-- **Shapes:** cards `rounded-3xl`, controls and buttons fully rounded / `rounded-2xl`, generous spacing, thin `line` borders.
+- **Shapes:** cards `rounded-2xl`, controls and buttons fully rounded / `rounded-2xl`, generous spacing, thin `line` borders.
 - **Type:** headings use the display font (`font-display`, Plus Jakarta Sans); body uses DM Sans.
 - **Layout:** public pages use `SiteHeader`; signed-in pages render inside `AppShell` (sidebar on desktop,
   tab bar on mobile). Dashboards start with `StatTile`s. Every list has a skeleton (`PageSkeleton`),

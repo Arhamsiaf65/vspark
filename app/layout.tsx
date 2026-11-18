@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -7,8 +7,15 @@ const display = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakart
 const sans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Captionly · AI captions, scheduled to Drive",
-  description: "Generate social captions with Gemini, schedule them, sync to Google Drive and get email reminders.",
+  title: "Captionly · Say it well. Post it on time.",
+  description: "AI captions with Gemini, scheduled and saved to your Google Drive, with email reminders.",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f1ea" },
+    { media: "(prefers-color-scheme: dark)", color: "#121110" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

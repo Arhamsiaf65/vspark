@@ -17,11 +17,11 @@ async function Gate({ children }: { children: React.ReactNode }) {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-display text-lg font-extrabold">
-            <Image src="/logo.svg" alt="" width={28} height={28} priority />
-            Captionly
+            <Image src="/logo-wordmark-light.svg" alt="Captionly" width={140} height={32} priority className="dark-hide" />
+            <Image src="/logo-wordmark-dark.svg" alt="" aria-hidden="true" width={140} height={32} priority className="light-hide" />
           </Link>
           <form action={signOut}>
             <button type="submit" className="btn btn-outline btn-sm">
