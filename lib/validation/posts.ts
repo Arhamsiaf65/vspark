@@ -60,6 +60,18 @@ export type UpdatePostInput = z.infer<typeof updatePostSchema>;
 
 export const deletePostSchema = z.object({ id: z.uuid("Invalid post") });
 
+export const SORTS = ["soonest", "newest", "oldest"] as const;
+export const STATUS_FILTERS = ["all", "draft", "scheduled"] as const;
+
+/** Feed query (search, filter, sort, cursor). Also drives live validation of the filter form. */
+export const listQuerySchema = z.object({
+  q: z.string().trim().max(80, "Search must be 80 characters or fewer").default(""),
+  status: z.enum(STATUS_FILTERS).default("all"),
+  sort: z.enum(SORTS).default("soonest"),
+  cursor: z.string().max(300).optional(),
+});
+export type ListQuery = z.infer<typeof listQuerySchema>;
+
 /** Turn "#a #b, c" into ["a","b","c"]. */
 export function parseHashtags(raw: string): string[] {
   return raw

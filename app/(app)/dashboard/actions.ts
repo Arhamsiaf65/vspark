@@ -13,7 +13,7 @@ import {
 import { settingsSchema } from "@/lib/validation/settings";
 import type { CaptionOption } from "@/lib/validation/ai";
 import { generateCaptions } from "@/lib/services/gemini";
-import { createPost, deletePost, setDriveFileId, updatePost, type PostRow } from "@/lib/services/posts";
+import { createPost, deletePost, restorePost, setDriveFileId, updatePost, type PostRow } from "@/lib/services/posts";
 import { deleteFile, syncPost } from "@/lib/services/drive";
 import { saveSettings } from "@/lib/services/settings";
 
@@ -147,4 +147,20 @@ export async function saveSettingsAction(input: unknown): Promise<ActionResult> 
 
   revalidatePath("/dashboard");
   return { ok: true, message: "Notification settings saved." };
+}
+
+/** Undo a soft delete and re-create the Drive file (it was removed on delete). */
+export async function restorePostAction(input: unknown): Promise<ActionResult> {
+  const { db, user } = await currentUser();
+  if (!user) return { ok: false, error: NOT_SIGNED_IN };
+
+  const parsed = deletePostSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid post." };
+
+  const restored = await restorePost(db, user.id, parsed.data.id);
+  if (restored.data === null) return { ok: false, error: toSafeError(new Error(restored.error), "Couldn't restore the post.") };
+
+  const synced = await pushToDrive(db, user.id, restored.data);
+  revalidatePath("/dashboard");
+  return synced ? { ok: true, message: "Post restored." } : { ok: true, message: "Post restored.", warning: DRIVE_WARNING };
 }

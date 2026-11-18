@@ -2,7 +2,7 @@
 
 import { useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { deletePostAction, updatePostAction } from "@/app/(app)/dashboard/actions";
+import { deletePostAction, restorePostAction, updatePostAction } from "@/app/(app)/dashboard/actions";
 import { useLiveValidation } from "@/lib/hooks/use-live-validation";
 import { parseHashtags, updatePostSchema } from "@/lib/validation/posts";
 import type { PostRow } from "@/lib/services/posts";
@@ -27,7 +27,15 @@ export function PostList({ posts }: { posts: PostRow[] }) {
       hide(id);
       const res = await deletePostAction({ id });
       if (!res.ok) return void toast.error(res.error);
-      toast.success(res.message ?? "Deleted.");
+      toast.success(res.message ?? "Deleted.", {
+        duration: 8000,
+        action: {
+          label: "Undo",
+          onClick: () => {
+            void restorePostAction({ id }).then((r) => (r.ok ? toast.success(r.message ?? "Restored.") : toast.error(r.error)));
+          },
+        },
+      });
       if (res.warning) toast.warning(res.warning);
     });
   }
