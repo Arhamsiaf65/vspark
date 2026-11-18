@@ -3,7 +3,7 @@ import { rateLimit, redact, requireRole, toSafeError } from "@/lib/security";
 
 describe("redact", () => {
   it("removes emails, bearer tokens and long secrets", () => {
-    const out = redact("fail for a.b@gmail.com Bearer abc.def-123 key sk_test_51U6lnWRvNCENM8sIaMgudICA3E3FeyoTI5H90GJ");
+    const out = redact("fail for a.b@gmail.com Bearer abc.def-123 key sk_test_FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE0000");
     expect(out).not.toContain("gmail.com");
     expect(out).not.toContain("abc.def");
     expect(out).not.toContain("sk_test");
