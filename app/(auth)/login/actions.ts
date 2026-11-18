@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { publicEnv } from "@/lib/env";
+import { getPublicEnv } from "@/lib/env";
 import { toSafeError } from "@/lib/security";
 
 /** Google sign-in that also requests Drive access (drive.file: only files this app creates). */
@@ -11,7 +11,7 @@ export async function signInWithGoogle() {
   const { data, error } = await db.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${publicEnv.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      redirectTo: `${getPublicEnv().NEXT_PUBLIC_SITE_URL}/auth/callback`,
       scopes: "https://www.googleapis.com/auth/drive.file",
       queryParams: { access_type: "offline", prompt: "consent" },
     },
